@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokémon Mundo Misterioso</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+  <!-- FONDO RETRO WEBGL (Oculto inicialmente) -->
+  <canvas id="glcanvas"></canvas>
+
+  <!-- PANTALLA DE INTRODUCCIÓN (Negra) -->
+  <div id="intro" class="pantalla activa" onclick="avanzarIntro()">
+    <div id="introTexto" class="texto-centrado"></div>
+    <div id="introFlecha">▼</div>
+  </div>
+
+  <!-- PANTALLA DE PREGUNTA INDIVIDUAL -->
+  <div id="preguntas" class="pantalla oculta">
+    <div class="caja-pmd contenedor-respuestas" id="respuestasContainer">
+      <div class="respuestas-container" id="listaRespuestas"></div>
+    </div>
+    
+    <div class="caja-pmd contenedor-pregunta" id="cajaPregunta">
+      <div class="pregunta-texto" id="preguntaTexto"></div>
+      <div class="flecha-continuar" id="flechaContinuar">▼</div>
+    </div>
+  </div>
+
+  <!-- PANTALLA DE SELECCIÓN DE POKÉMON -->
+  <div id="seleccionPokemon" class="pantalla oculta">
+    <div class="pokemon-seleccion-container" id="pokemonOptionsContainer" style="display: none;"></div>
+    
+    <div class="caja-pmd caja-pmd-azul contenedor-pregunta" id="cajaSeleccionTexto" style="display: none;">
+      <div class="pregunta-texto texto-centrado" id="seleccionTexto"></div>
+      <div class="flecha-continuar" id="flechaSeleccion" style="display: none;">▼</div>
+    </div>
+  </div>
+
+  <!-- PANTALLA DE RESULTADOS FINAL -->
+  <div id="resultados" class="pantalla oculta">
+    <!-- Pokémon Gigante Flotando en su propia caja -->
+    <div id="pokemonFinalContainer" style="position: absolute; top: 25vh; width: 100%; display: flex; justify-content: center; align-items: center;">
+      <div class="pokemon-card">
+        <div class="marco-retrato">
+          <img id="pokemonImg" crossorigin="anonymous" src="" alt="Tu Pokémon">
+        </div>
+      </div>
+    </div>
+
+    <!-- Caja de diálogo inferior -->
+    <div class="caja-pmd caja-pmd-azul contenedor-pregunta" id="cajaResultadosTexto">
+      <div class="pregunta-texto texto-centrado" id="resultadosTexto"></div>
+      <div class="flecha-continuar" id="flechaResultados" style="display: none;">▼</div>
+    </div>
+    
+    <!-- Botones cuadrados en la esquina inferior derecha -->
+    <!-- Los botones de captura han sido removidos a petición del usuario -->
+  </div>
+
+  <div id="pantallaReintento" class="pantalla oculta" style="background-color: black; z-index: 50; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 20px;">
+    <h2 style="color: white; font-size: 32px; margin-bottom: 10px;">¿Deseas intentarlo otra vez?</h2>
+    <div style="display: flex; gap: 20px;">
+      <button class="btn-blanco-negro" onclick="reiniciarTotal()">Reiniciar Test</button>
+      <button class="btn-blanco-negro" onclick="window.open('https://github.com/catulcatana/pokeMundoMisterioso', '_blank')">
+        <svg height="24" viewBox="0 0 16 16" width="24" style="fill: white;">
+          <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+        </svg>
+        Mi GitHub
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('glcanvas');
+    // preserveDrawingBuffer es CRÍTICO para que html2canvas pueda tomarle foto al WebGL
+    const gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
+    if (!gl) { console.warn('WebGL no soportado'); }
+    else {
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+      
+      const vsSource = `
+        attribute vec4 aVertexPosition;
+        void main() {
+          gl_Position = aVertexPosition;
+        }
+      `;
+      
+      const fsSource = `
+        #ifdef GL_ES
+        precision mediump float;
+        #endif
+        
+        uniform vec2 u_resolution;
+        uniform float u_time;
+        
+        vec3 hsv2rgb(vec3 c) {
+            vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+            vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+            return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+        }
+        
+        void main() {
+            vec2 fragCoord = gl_FragCoord.xy;
+            vec2 uv = fragCoord / u_resolution.xy;
+            float X = uv.x * 240.0;
+            float Y = uv.y * 160.0;
+            
+            float t = (u_time / 10.0) * 6.28318530718;
+            
+            float hue = fract(u_time / 10.0);
+            vec3 bg_color = hsv2rgb(vec3(hue, 0.6, 0.85)); 
+            
+            float amp1 = 24.0 + 4.0 * sin(t * 2.0);
+            float amp2 = 20.0 + 4.0 * sin(t * 3.0 + 1.0);
+            float amp3 = 26.0 + 3.0 * cos(t * 1.0);
+            
+            float offset1 = amp1 * sin(Y * 0.08 + t * 1.5) + 10.0 * sin(Y * 0.05 - t * 2.5);
+            float cx1 = 120.0 + offset1;
+            float norm1 = abs(X - cx1) / 80.0; 
+            float i1 = exp(-1.5 * norm1 * norm1) * 0.6; 
+            
+            float offset2 = amp2 * sin(Y * 0.09 - t * 2.0 + 2.0) + 12.0 * sin(Y * 0.04 + t * 1.8);
+            float cx2 = 90.0 + offset2;
+            float norm2 = abs(X - cx2) / 60.0;
+            float i2 = exp(-1.5 * norm2 * norm2) * 0.7;
+            
+            float offset3 = amp3 * sin(Y * 0.07 + t * 1.2 + 4.0) + 14.0 * sin(Y * 0.06 - t * 2.2);
+            float cx3 = 150.0 + offset3;
+            float norm3 = abs(X - cx3) / 70.0;
+            float i3 = exp(-1.5 * norm3 * norm3) * 0.8;
+            
+            float total_intensity = 1.0 - (1.0 - i1) * (1.0 - i2) * (1.0 - i3);
+            total_intensity = clamp(total_intensity, 0.0, 1.0);
+            
+            vec3 final_rgb = mix(bg_color, vec3(1.0), total_intensity);
+            
+            gl_FragColor = vec4(final_rgb, 1.0);
+        }
+      `;
+      
+      function loadShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+          gl.deleteShader(shader);
+          return null;
+        }
+        return shader;
+      }
+      
+      const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
+      const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
+      const shaderProgram = gl.createProgram();
+      gl.attachShader(shaderProgram, vertexShader);
+      gl.attachShader(shaderProgram, fragmentShader);
+      gl.linkProgram(shaderProgram);
+      
+      const positionBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+      const positions = [
+        -1.0,  1.0,
+         1.0,  1.0,
+        -1.0, -1.0,
+         1.0, -1.0,
+      ];
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+      
+      const timeLocation = gl.getUniformLocation(shaderProgram, "u_time");
+      const resLocation = gl.getUniformLocation(shaderProgram, "u_resolution");
+      const vertexPosition = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+      
+      function render(now) {
+        now *= 0.001; 
+        gl.useProgram(shaderProgram);
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.vertexAttribPointer(vertexPosition, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(vertexPosition);
+        
+        gl.uniform1f(timeLocation, now);
+        gl.uniform2f(resLocation, canvas.width, canvas.height);
+        
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    }
+  </script>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,456 @@
+/* Estilos base */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700; 
+  color: white;
+  overflow: hidden; 
+  background-color: #000;
+}
+
+/* Canvas del Fondo Retro */
+#glcanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  display: none; /* Inicia oculto, se muestra con fade en la entrevista */
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+}
+
+/* Pantallas y transiciones */
+.pantalla {
+  display: none;
+  width: 100%;
+  height: 100vh; 
+  box-sizing: border-box;
+  position: relative; 
+}
+
+.pantalla.activa {
+  display: block;
+  animation: fadeInAnim 0.5s ease-in-out forwards;
+}
+
+.pantalla-centrada.activa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInAnim 0.5s ease-in-out forwards;
+}
+
+/* --------------------------------------
+   PANTALLA DE INTRODUCCIÓN (Negra)
+-------------------------------------- */
+#intro {
+  background-color: #000;
+  cursor: pointer;
+  z-index: 10;
+}
+
+#introTexto {
+  font-size: 32px;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 800px;
+  line-height: 1.5;
+  white-space: pre-wrap; 
+  /* La animación se maneja por JavaScript ahora */
+}
+
+@keyframes fadeInAnim {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#introFlecha {
+  position: absolute;
+  bottom: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 32px;
+  color: #ffffff; /* Flecha blanca */
+  animation: parpadeo 1s infinite;
+  display: none;
+}
+
+/* --------------------------------------
+   CAJA DE DIÁLOGO PMD (Bordes Auténticos)
+-------------------------------------- */
+.caja-pmd {
+  background-color: #98f898; /* Contorno externo más claro */
+  clip-path: polygon(
+    12px 0, calc(100% - 12px) 0, 
+    100% 12px, 100% calc(100% - 12px), 
+    calc(100% - 12px) 100%, 12px 100%, 
+    0 calc(100% - 12px), 0 12px
+  );
+  padding: 20px 45px; /* Más padding lateral por los bordes asimétricos gruesos */
+  color: white;
+  position: relative;
+  z-index: 1; /* Contexto de apilamiento */
+}
+
+/* Capa media: Borde verde principal */
+.caja-pmd::before {
+  content: "";
+  position: absolute;
+  top: 3px; bottom: 3px; left: 3px; right: 3px; /* Borde claro mide 3px */
+  background-color: #48d848;
+  clip-path: polygon(
+    10px 0, calc(100% - 10px) 0, 
+    100% 10px, 100% calc(100% - 10px), 
+    calc(100% - 10px) 100%, 10px 100%, 
+    0 calc(100% - 10px), 0 10px
+  );
+  z-index: -2;
+}
+
+/* Capa interior: Borde oscuro (sombra) y Fondo azul */
+.caja-pmd::after {
+  content: "";
+  position: absolute;
+  /* Bordes asimétricos del verde principal: 4px arriba/abajo, 20px laterales */
+  top: 7px; bottom: 7px; left: 23px; right: 23px; 
+  /* Un gradiente que deja ver 3px del color de fondo (#208038) para formar el borde oscuro */
+  background: 
+    linear-gradient(#284260, #284260) center/calc(100% - 6px) calc(100% - 6px) no-repeat,
+    #186028; /* Verde oscuro (sombra) */
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0, 
+    100% 8px, 100% calc(100% - 8px), 
+    calc(100% - 8px) 100%, 8px 100%, 
+    0 calc(100% - 8px), 0 8px
+  );
+  z-index: -1;
+}
+
+/* --------------------------------------
+   ESTRUCTURA PREGUNTAS Y RESPUESTAS
+-------------------------------------- */
+.contenedor-pregunta {
+  position: absolute;
+  bottom: 8vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 150px; 
+  box-sizing: border-box;
+  cursor: pointer; 
+}
+
+.contenedor-respuestas {
+  position: absolute;
+  bottom: calc(8vh + 150px - 5px); 
+  right: calc(50% - 400px); 
+  min-width: 250px;
+  max-width: 500px;
+  padding: 20px 25px !important; /* Más padding para los bordes gruesos */
+  display: none; 
+}
+
+/* Tipografía general */
+h1 {
+  font-size: 32px;
+  margin: 0 0 20px 0;
+  text-align: center;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.5); 
+}
+
+h2 {
+  font-size: 26px;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+}
+
+p, .pregunta-texto {
+  font-size: 26px; 
+  margin: 0;
+  line-height: 1.4;
+  white-space: pre-wrap; 
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.8); 
+  /* Evitar que el texto choque con los bordes super gruesos */
+  padding: 0 10px;
+}
+
+.pregunta-texto {
+  height: 72px; /* 2 líneas max */
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+}
+
+.flecha-continuar {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  line-height: 1; 
+  color: #ffffff;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+  animation: parpadeo 1s infinite;
+  display: none; 
+}
+
+@keyframes parpadeo {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Botones de respuesta */
+.respuestas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 5px 15px;
+}
+
+.btn-respuesta {
+  background: transparent;
+  color: white;
+  border: none;
+  text-align: left;
+  padding: 5px 10px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  cursor: pointer;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+  position: relative;
+  transition: transform 0.1s;
+}
+
+.btn-respuesta:hover {
+  color: #ffffff;
+  transform: translateX(10px);
+}
+
+.btn-respuesta:hover::before {
+  content: "▶";
+  position: absolute;
+  left: -20px;
+  color: #ffffff;
+}
+
+/* Botones principales de la UI final */
+.btn-principal {
+  padding: 10px 20px;
+  font-size: 20px;
+  background-color: #284868;
+  color: #fff;
+  border: solid #4888d8;
+  border-width: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+  transition: transform 0.1s, background-color 0.2s;
+  margin-top: 15px;
+  position: relative;
+}
+
+.btn-principal::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: solid #98c8f8;
+  border-width: 2px 4px;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.btn-principal:hover {
+  background-color: #386088;
+}
+
+.btn-principal:active {
+  transform: translateY(2px);
+}
+
+.btn-cuadrado {
+  width: 55px;
+  height: 55px;
+  background-color: #284868;
+  color: #fff;
+  border: solid #4888d8;
+  border-width: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 26px;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+  transition: transform 0.1s, filter 0.2s;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-cuadrado::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: solid #98c8f8;
+  border-width: 2px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.btn-cuadrado:hover {
+  filter: brightness(1.2);
+  transform: scale(1.1);
+}
+
+.btn-cuadrado:active {
+  transform: scale(0.95);
+}
+
+.botones-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Selección de Pokémon (Ahora a los lados y grandes) */
+.pokemon-seleccion-container {
+  position: absolute;
+  top: 25vh;
+  width: 100%;
+  display: flex;
+  justify-content: space-around; /* Pokémon a izquierda y derecha */
+  align-items: center;
+  padding: 0 10vw;
+  box-sizing: border-box;
+}
+
+.pokemon-card {
+  /* Al tener caja-pmd, hereda los bordes asimétricos con clip-path */
+  cursor: pointer;
+  transition: transform 0.2s;
+  text-align: center;
+  width: fit-content; 
+  padding: 8px !important; /* Ajustar el marco exacto a la imagen */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pokemon-card:hover {
+  transform: scale(1.1); /* Zoom al pasar el cursor */
+}
+
+/* Variante azul de la caja PMD */
+.caja-pmd-azul {
+  background-color: #98c8f8; 
+}
+.caja-pmd-azul::before {
+  background-color: #4888d8;
+}
+.caja-pmd-azul::after {
+  background: 
+    linear-gradient(rgba(40, 72, 104, 0.9), rgba(40, 72, 104, 0.9)) center/calc(100% - 6px) calc(100% - 6px) no-repeat,
+    #183060;
+}
+
+.texto-centrado {
+  text-align: center;
+}
+
+/* Marco simétrico exclusivo para los retratos */
+.marco-retrato {
+  background-color: #98c8f8;
+  clip-path: polygon(18px 0, calc(100% - 18px) 0, 100% 18px, 100% calc(100% - 18px), calc(100% - 18px) 100%, 18px 100%, 0 calc(100% - 18px), 0 18px);
+  padding: 18px !important;
+  position: relative;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.marco-retrato::before {
+  content: "";
+  position: absolute;
+  top: 6px; bottom: 6px; left: 6px; right: 6px;
+  background-color: #4888d8;
+  clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+  z-index: -2;
+}
+
+.marco-retrato::after {
+  content: "";
+  position: absolute;
+  top: 12px; bottom: 12px; left: 12px; right: 12px;
+  background-color: #183060;
+  clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
+  z-index: -1;
+}
+
+.marco-retrato img {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.pokemon-card h3 {
+  margin: 15px 0 0 0;
+  font-size: 28px; /* Nombre más grande */
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+}
+
+/* Resultados e Imagen */
+.text-center {
+  text-align: center;
+}
+
+
+#loading {
+  font-size: 28px;
+  text-align: center;
+}
+
+.btn-blanco-negro {
+  padding: 10px 20px;
+  font-size: 20px;
+  background-color: #000;
+  color: #fff;
+  border: solid #fff;
+  border-width: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: transform 0.2s, background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.btn-blanco-negro:hover {
+  transform: scale(1.05);
+  background-color: #fff;
+  color: #000;
+}
+.btn-blanco-negro:hover svg {
+  fill: #000 !important;
+}
