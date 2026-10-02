@@ -243,86 +243,6 @@ p, .pregunta-texto {
   color: #ffffff;
 }
 
-/* Botones principales de la UI final */
-.btn-principal {
-  padding: 10px 20px;
-  font-size: 20px;
-  background-color: #284868;
-  color: #fff;
-  border: solid #4888d8;
-  border-width: 4px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: 'Nunito', sans-serif;
-  font-weight: 700;
-  text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
-  transition: transform 0.1s, background-color 0.2s;
-  margin-top: 15px;
-  position: relative;
-}
-
-.btn-principal::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  border: solid #98c8f8;
-  border-width: 2px 4px;
-  border-radius: 2px;
-  pointer-events: none;
-}
-
-.btn-principal:hover {
-  background-color: #386088;
-}
-
-.btn-principal:active {
-  transform: translateY(2px);
-}
-
-.btn-cuadrado {
-  width: 55px;
-  height: 55px;
-  background-color: #284868;
-  color: #fff;
-  border: solid #4888d8;
-  border-width: 4px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 26px;
-  text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
-  transition: transform 0.1s, filter 0.2s;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.btn-cuadrado::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  border: solid #98c8f8;
-  border-width: 2px;
-  border-radius: 4px;
-  pointer-events: none;
-}
-
-.btn-cuadrado:hover {
-  filter: brightness(1.2);
-  transform: scale(1.1);
-}
-
-.btn-cuadrado:active {
-  transform: scale(0.95);
-}
-
-.botones-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  justify-content: center;
-  margin-top: 20px;
-}
 
 /* Selección de Pokémon (Ahora a los lados y grandes) */
 .pokemon-seleccion-container {
@@ -410,23 +330,7 @@ p, .pregunta-texto {
   z-index: 1;
 }
 
-.pokemon-card h3 {
-  margin: 15px 0 0 0;
-  font-size: 28px; /* Nombre más grande */
-  text-transform: uppercase;
-  text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
-}
 
-/* Resultados e Imagen */
-.text-center {
-  text-align: center;
-}
-
-
-#loading {
-  font-size: 28px;
-  text-align: center;
-}
 
 .btn-blanco-negro {
   padding: 10px 20px;

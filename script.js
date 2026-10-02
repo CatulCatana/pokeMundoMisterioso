@@ -27,9 +27,21 @@ let elementoFlechaActual = null;
 
 // AL CARGAR
 window.onload = () => {
+    bgm.pause();
+    bgm.currentTime = 0;
   iniciarIntro();
 };
 
+const sfxClick = new Audio("assets/audio/sfx_select.ogg");
+sfxClick.volume = 0.5;
+function playClick() {
+  sfxClick.currentTime = 0;
+  sfxClick.play().catch(e => {});
+}
+
+const bgm = new Audio("assets/audio/bgm.ogg");
+bgm.loop = true;
+bgm.volume = 0.4;
 function mostrarPantalla(idPantalla) {
   document.querySelectorAll('.pantalla').forEach(p => {
     p.classList.remove('activa');
@@ -66,6 +78,7 @@ function escribirLineaIntro() {
 }
 
 function avanzarIntro() {
+  playClick();
   if (escribiendo) {
     clearTimeout(timeoutId);
     escribiendo = false;
@@ -136,6 +149,7 @@ function iniciarTest() {
   }
   
   mostrarPantalla('preguntas');
+  bgm.play().catch(e => console.log("Autoplay bloqueado", e));
   prepararPregunta();
 }
 
@@ -189,6 +203,7 @@ function escribirPartePregunta() {
 }
 
 function avanzarDialogoPregunta() {
+  playClick();
   if (escribiendo) {
     clearTimeout(timeoutId);
     textoAcumulado += textoActual; if(elementoTextoActual.classList.contains('texto-centrado')){elementoTextoActual.innerHTML = textoAcumulado;}else{elementoTextoActual.innerText = textoAcumulado;} elementoTextoActual.scrollTop = elementoTextoActual.scrollHeight;
@@ -218,6 +233,7 @@ function mostrarRespuestas() {
     btn.className = "btn-respuesta";
     btn.innerText = resp.t;
     btn.onclick = (e) => {
+      playClick();
       e.stopPropagation(); 
       responder(resp.p);
     };
@@ -293,6 +309,7 @@ function mostrarDescripcion() {
 }
 
 function avanzarDialogoDescripcion() {
+  playClick();
   if (escribiendo) {
     clearTimeout(timeoutId);
     textoAcumulado += textoActual; if(elementoTextoActual.classList.contains('texto-centrado')){elementoTextoActual.innerHTML = textoAcumulado;}else{elementoTextoActual.innerText = textoAcumulado;} elementoTextoActual.scrollTop = elementoTextoActual.scrollHeight;
@@ -343,7 +360,7 @@ function mostrarSeleccion() {
         <img crossorigin="anonymous" src="${portraitUrl1}?v=1" alt="${poke1.name}">
       </div>
     `;
-    card1.onclick = () => verResultadoFinal(poke1);
+    card1.onclick = () => { playClick(); verResultadoFinal(poke1); };
     
     const card2 = document.createElement('div');
     card2.className = 'pokemon-card';
@@ -352,7 +369,7 @@ function mostrarSeleccion() {
         <img crossorigin="anonymous" src="${portraitUrl2}?v=1" alt="${poke2.name}">
       </div>
     `;
-    card2.onclick = () => verResultadoFinal(poke2);
+    card2.onclick = () => { playClick(); verResultadoFinal(poke2); };
 
     opciones.appendChild(card1);
     opciones.appendChild(card2);
@@ -376,6 +393,7 @@ function mostrarSeleccion() {
 }
 
 function avanzarDialogoSeleccion() {
+  playClick();
   if (escribiendo) {
     clearTimeout(timeoutId);
     textoAcumulado += textoActual; if(elementoTextoActual.classList.contains('texto-centrado')){elementoTextoActual.innerHTML = textoAcumulado;}else{elementoTextoActual.innerText = textoAcumulado;} elementoTextoActual.scrollTop = elementoTextoActual.scrollHeight;
@@ -422,6 +440,7 @@ function verResultadoFinal(pokeData) {
 }
 
 function avanzarDialogoResultados() {
+  playClick();
   if (escribiendo) {
     clearTimeout(timeoutId);
     textoAcumulado += textoActual; 
@@ -456,6 +475,7 @@ function avanzarDialogoResultados() {
 }
 
 function reiniciarTotal() {
+  playClick();
   // Limpiar variables
   indicePregunta = 0;
   puntajes = { HARDY:0, DOCILE:0, BRAVE:0, JOLLY:0, IMPISH:0, NAIVE:0, TIMID:0, HASTY:0, SASSY:0, CALM:0, RELAXED:0, LONELY:0, QUIRKY:0, MISC:0 };
@@ -471,6 +491,8 @@ function reiniciarTotal() {
   
   setTimeout(() => {
     document.getElementById('glcanvas').style.display = 'none';
+    bgm.pause();
+    bgm.currentTime = 0;
     iniciarIntro();
   }, 1000);
 }

@@ -59,7 +59,6 @@
     </div>
     
     <!-- Botones cuadrados en la esquina inferior derecha -->
-    <!-- Los botones de captura han sido removidos a petición del usuario -->
   </div>
 
   <div id="pantallaReintento" class="pantalla oculta" style="background-color: black; z-index: 50; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 20px;">
@@ -77,8 +76,8 @@
 
   <script>
     const canvas = document.getElementById('glcanvas');
-    // preserveDrawingBuffer es CRÍTICO para que html2canvas pueda tomarle foto al WebGL
-    const gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
+
+    const gl = canvas.getContext('webgl', { alpha: false });
     if (!gl) { console.warn('WebGL no soportado'); }
     else {
       function resize() {
